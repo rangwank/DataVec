@@ -160,7 +160,7 @@ public class CollectionSequenceRecordReader extends BaseRecordReader implements 
 
         List<SequenceRecord> out = new ArrayList<>();
         if (original instanceof List) {
-            List<Collection<? extends Collection<Writable>>> asList = (List<Collection<? extends Collection<Writable>>>) original;
+            List<Collection<? extends Collection<Writable>>> asList = new ArrayList<>(original);
             for (Integer i : toLoad) {
                 List<List<Writable>> l = toList(asList.get(i));
                 SequenceRecord r = new org.datavec.api.records.impl.SequenceRecord(l, new RecordMetaDataIndex(i, null, CollectionSequenceRecordReader.class));
