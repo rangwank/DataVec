@@ -74,6 +74,7 @@
         <maven>3.0</maven>
     </prerequisites>
 
+<!--
     <distributionManagement>
         <snapshotRepository>
             <id>sonatype-nexus-snapshots</id>
@@ -86,6 +87,7 @@
             <url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
+-->
 
 
     <profiles>
@@ -447,7 +449,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
+           <!-- <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>${maven-deploy-plugin.version}</version>
                 <configuration>
@@ -471,10 +473,10 @@
                 <configuration>
                     <serverId>sonatype-nexus-snapshots</serverId>
                     <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <!--<skipStagingRepositoryClose>true</skipStagingRepositoryClose>-->
-                    <!--<stagingProfileId>13036484d8827</stagingProfileId>-->
+                    &lt;!&ndash;<skipStagingRepositoryClose>true</skipStagingRepositoryClose>&ndash;&gt;
+                    &lt;!&ndash;<stagingProfileId>13036484d8827</stagingProfileId>&ndash;&gt;
                 </configuration>
-            </plugin>
+            </plugin>-->
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
             </plugin>
