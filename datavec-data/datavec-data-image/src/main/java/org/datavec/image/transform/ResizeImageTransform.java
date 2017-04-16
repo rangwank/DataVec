@@ -54,8 +54,6 @@ public class ResizeImageTransform extends BaseImageTransform<opencv_core.Mat> {
 
         this.newWidth = newWidth;
         this.newHeight = newHeight;
-
-        converter = new OpenCVFrameConverter.ToMat();
     }
 
     /**
@@ -71,10 +69,11 @@ public class ResizeImageTransform extends BaseImageTransform<opencv_core.Mat> {
         if (image == null) {
             return null;
         }
-        opencv_core.Mat mat = converter.convert(image.getFrame());
+        OpenCVFrameConverter<opencv_core.Mat> frameConverter = new OpenCVFrameConverter.ToMat();
+        opencv_core.Mat mat = frameConverter.convert(image.getFrame());
         opencv_core.Mat result = new opencv_core.Mat();
         resize(mat, result, new opencv_core.Size(newWidth, newHeight));
-        return new ImageWritable(converter.convert(result));
+        return new ImageWritable(frameConverter.convert(result));
     }
 
 

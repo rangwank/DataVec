@@ -53,7 +53,6 @@ public class EqualizeHistTransform extends BaseImageTransform {
     public EqualizeHistTransform(Random random, int conversionCode) {
         super(random);
         this.conversionCode = conversionCode;
-        converter = new OpenCVFrameConverter.ToMat();
     }
 
     /**
@@ -70,7 +69,8 @@ public class EqualizeHistTransform extends BaseImageTransform {
         if (image == null) {
             return null;
         }
-        Mat mat = (Mat) converter.convert(image.getFrame());
+        OpenCVFrameConverter<Mat> frameConverter = new OpenCVFrameConverter.ToMat();
+        Mat mat = frameConverter.convert(image.getFrame());
         Mat result = new Mat();
         try {
             if (mat.channels() == 1) {
@@ -84,7 +84,7 @@ public class EqualizeHistTransform extends BaseImageTransform {
             throw new RuntimeException(e);
         }
 
-        return new ImageWritable(converter.convert(result));
+        return new ImageWritable(frameConverter.convert(result));
     }
 
 

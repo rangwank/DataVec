@@ -48,8 +48,6 @@ public class RandomCropTransform extends BaseImageTransform<Mat> {
         this.outputWidth = width;
         this.rng = Nd4j.getRandom();
         rng.setSeed(seed);
-
-        converter = new OpenCVFrameConverter.ToMat();
     }
 
     /**
@@ -64,6 +62,8 @@ public class RandomCropTransform extends BaseImageTransform<Mat> {
         if (image == null) {
             return null;
         }
+        OpenCVFrameConverter<Mat> frameConverter = new OpenCVFrameConverter.ToMat();
+
         // ensure that transform is valid
         if (image.getFrame().imageHeight < outputHeight || image.getFrame().imageWidth < outputWidth)
             throw new UnsupportedOperationException(
@@ -75,7 +75,7 @@ public class RandomCropTransform extends BaseImageTransform<Mat> {
         int cropTop = image.getFrame().imageHeight - outputHeight;
         int cropLeft = image.getFrame().imageWidth - outputWidth;
 
-        Mat mat = converter.convert(image.getFrame());
+        Mat mat = frameConverter.convert(image.getFrame());
         int top = rng.nextInt(cropTop + 1);
         int left = rng.nextInt(cropLeft + 1);
 
@@ -83,8 +83,7 @@ public class RandomCropTransform extends BaseImageTransform<Mat> {
         int x = Math.min(left, mat.cols() - 1);
         Mat result = mat.apply(new Rect(x, y, outputWidth, outputHeight));
 
-
-        return new ImageWritable(converter.convert(result));
+        return new ImageWritable(frameConverter.convert(result));
     }
 
 }

@@ -58,7 +58,6 @@ public class FlipImageTransform extends BaseImageTransform<Mat> {
      */
     public FlipImageTransform(Random random) {
         super(random);
-        converter = new OpenCVFrameConverter.ToMat();
     }
 
     @Override
@@ -66,7 +65,8 @@ public class FlipImageTransform extends BaseImageTransform<Mat> {
         if (image == null) {
             return null;
         }
-        Mat mat = converter.convert(image.getFrame());
+        OpenCVFrameConverter<Mat> frameConverter = new OpenCVFrameConverter.ToMat();
+        Mat mat = frameConverter.convert(image.getFrame());
 
         int mode = random != null ? random.nextInt(4) - 2 : flipMode;
 
@@ -78,7 +78,7 @@ public class FlipImageTransform extends BaseImageTransform<Mat> {
             flip(mat, result, mode);
         }
 
-        return new ImageWritable(converter.convert(result));
+        return new ImageWritable(frameConverter.convert(result));
     }
 }
 

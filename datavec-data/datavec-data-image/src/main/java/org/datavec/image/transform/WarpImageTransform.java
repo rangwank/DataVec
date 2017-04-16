@@ -86,8 +86,6 @@ public class WarpImageTransform extends BaseImageTransform<Mat> {
         deltas[5] = dy3;
         deltas[6] = dx4;
         deltas[7] = dy4;
-
-        converter = new OpenCVFrameConverter.ToMat();
     }
 
     /**
@@ -103,7 +101,9 @@ public class WarpImageTransform extends BaseImageTransform<Mat> {
         if (image == null) {
             return null;
         }
-        Mat mat = converter.convert(image.getFrame());
+        OpenCVFrameConverter<Mat> frameConverter = new OpenCVFrameConverter.ToMat();
+
+        Mat mat = frameConverter.convert(image.getFrame());
         Point2f src = new Point2f(4);
         Point2f dst = new Point2f(4);
         src.put(0, 0, mat.cols(), 0, mat.cols(), mat.rows(), 0, mat.rows());
@@ -115,7 +115,7 @@ public class WarpImageTransform extends BaseImageTransform<Mat> {
         Mat M = getPerspectiveTransform(src, dst);
         warpPerspective(mat, result, M, mat.size(), interMode, borderMode, borderValue);
 
-        return new ImageWritable(converter.convert(result));
+        return new ImageWritable(frameConverter.convert(result));
     }
 
 }

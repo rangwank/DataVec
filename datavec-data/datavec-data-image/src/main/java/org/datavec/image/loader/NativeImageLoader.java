@@ -28,6 +28,7 @@ import org.bytedeco.javacpp.indexer.Indexer;
 import org.bytedeco.javacpp.indexer.IntIndexer;
 import org.bytedeco.javacpp.indexer.UByteIndexer;
 import org.bytedeco.javacpp.indexer.UShortIndexer;
+import org.bytedeco.javacv.FrameConverter;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.datavec.image.data.ImageWritable;
@@ -212,11 +213,10 @@ public class NativeImageLoader extends BaseImageLoader {
     }
 
     public INDArray asMatrix(Mat image) throws IOException {
-        if (imageTransform != null && converter != null) {
-            ImageWritable writable = new ImageWritable(converter.convert(image));
-            writable = imageTransform.transform(writable);
-            image = converter.convert(writable.getFrame());
-        }
+        OpenCVFrameConverter<Mat> frameConverter = new OpenCVFrameConverter.ToMat();
+        ImageWritable writable = new ImageWritable(frameConverter.convert(image));
+        writable = imageTransform.transform(writable);
+        image = frameConverter.convert(writable.getFrame());
 
         if (channels > 0 && image.channels() != channels) {
             int code = -1;

@@ -30,7 +30,7 @@ import org.datavec.image.data.ImageWritable;
 public abstract class BaseImageTransform<F> implements ImageTransform {
 
     protected Random random;
-    protected FrameConverter<F> converter;
+//    protected FrameConverter<F> converter; // TODO: this isn't thread-safe, maybe class ref instead?
 
     protected BaseImageTransform(Random random) {
         this.random = random;

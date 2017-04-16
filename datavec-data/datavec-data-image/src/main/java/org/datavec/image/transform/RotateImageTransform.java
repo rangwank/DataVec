@@ -71,8 +71,6 @@ public class RotateImageTransform extends BaseImageTransform<Mat> {
         this.centery = centery;
         this.angle = angle;
         this.scale = scale;
-
-        converter = new OpenCVFrameConverter.ToMat();
     }
 
     @Override
@@ -80,7 +78,9 @@ public class RotateImageTransform extends BaseImageTransform<Mat> {
         if (image == null) {
             return null;
         }
-        Mat mat = converter.convert(image.getFrame());
+        OpenCVFrameConverter<Mat> frameConverter = new OpenCVFrameConverter.ToMat();
+
+        Mat mat = frameConverter.convert(image.getFrame());
         float cy = mat.rows() / 2 + centery * (random != null ? 2 * random.nextFloat() - 1 : 1);
         float cx = mat.cols() / 2 + centerx * (random != null ? 2 * random.nextFloat() - 1 : 1);
         float a = angle * (random != null ? 2 * random.nextFloat() - 1 : 1);
@@ -89,7 +89,7 @@ public class RotateImageTransform extends BaseImageTransform<Mat> {
         Mat result = new Mat();
         Mat M = getRotationMatrix2D(new Point2f(cx, cy), angle, scale);
         warpAffine(mat, result, M, mat.size(), interMode, borderMode, borderValue);
-        return new ImageWritable(converter.convert(result));
+        return new ImageWritable(frameConverter.convert(result));
     }
 
 }

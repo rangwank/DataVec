@@ -58,8 +58,6 @@ public class ScaleImageTransform extends BaseImageTransform<Mat> {
         super(random);
         this.dx = dx;
         this.dy = dy;
-
-        converter = new OpenCVFrameConverter.ToMat();
     }
 
     @Override
@@ -67,13 +65,15 @@ public class ScaleImageTransform extends BaseImageTransform<Mat> {
         if (image == null) {
             return null;
         }
-        Mat mat = converter.convert(image.getFrame());
+        OpenCVFrameConverter<Mat> frameConverter = new OpenCVFrameConverter.ToMat();
+
+        Mat mat = frameConverter.convert(image.getFrame());
         int h = Math.round(mat.rows() + dy * (random != null ? 2 * random.nextFloat() - 1 : 1));
         int w = Math.round(mat.cols() + dx * (random != null ? 2 * random.nextFloat() - 1 : 1));
 
         Mat result = new Mat();
         resize(mat, result, new Size(w, h));
-        return new ImageWritable(converter.convert(result));
+        return new ImageWritable(frameConverter.convert(result));
     }
 
 }

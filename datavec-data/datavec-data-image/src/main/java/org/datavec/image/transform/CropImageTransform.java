@@ -60,8 +60,6 @@ public class CropImageTransform extends BaseImageTransform<Mat> {
         this.cropLeft = cropLeft;
         this.cropBottom = cropBottom;
         this.cropRight = cropRight;
-
-        converter = new OpenCVFrameConverter.ToMat();
     }
 
     /**
@@ -77,7 +75,9 @@ public class CropImageTransform extends BaseImageTransform<Mat> {
         if (image == null) {
             return null;
         }
-        Mat mat = converter.convert(image.getFrame());
+        OpenCVFrameConverter<Mat> frameConverter = new OpenCVFrameConverter.ToMat();
+
+        Mat mat = frameConverter.convert(image.getFrame());
         int top = random != null ? random.nextInt(cropTop + 1) : cropTop;
         int left = random != null ? random.nextInt(cropLeft + 1) : cropLeft;
         int bottom = random != null ? random.nextInt(cropBottom + 1) : cropBottom;
@@ -90,7 +90,7 @@ public class CropImageTransform extends BaseImageTransform<Mat> {
         Mat result = mat.apply(new Rect(x, y, w, h));
 
 
-        return new ImageWritable(converter.convert(result));
+        return new ImageWritable(frameConverter.convert(result));
     }
 
 }

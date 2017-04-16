@@ -70,10 +70,8 @@ public class ShowImageTransform extends BaseImageTransform {
 
     @Override
     public ImageWritable transform(ImageWritable image, Random random) {
-        if (image == null) {
-            canvas.dispose();
-            return null;
-        }
+        canvas.dispose(); // clean-up
+
         if (!canvas.isVisible()) {
             return image;
         }
