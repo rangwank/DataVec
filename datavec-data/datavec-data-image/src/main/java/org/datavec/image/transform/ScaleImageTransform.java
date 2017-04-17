@@ -15,8 +15,10 @@
  */
 package org.datavec.image.transform;
 
+import java.util.HashMap;
 import java.util.Random;
 
+import org.bytedeco.javacv.FrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.datavec.image.data.ImageWritable;
 
@@ -58,6 +60,7 @@ public class ScaleImageTransform extends BaseImageTransform<Mat> {
         super(random);
         this.dx = dx;
         this.dy = dy;
+        this.safeConverter = new HashMap<>();
     }
 
     @Override
@@ -65,7 +68,7 @@ public class ScaleImageTransform extends BaseImageTransform<Mat> {
         if (image == null) {
             return null;
         }
-        OpenCVFrameConverter<Mat> frameConverter = new OpenCVFrameConverter.ToMat();
+        FrameConverter<Mat> frameConverter = getSafeConverter(Thread.currentThread().getId());
 
         Mat mat = frameConverter.convert(image.getFrame());
         int h = Math.round(mat.rows() + dy * (random != null ? 2 * random.nextFloat() - 1 : 1));
@@ -74,6 +77,16 @@ public class ScaleImageTransform extends BaseImageTransform<Mat> {
         Mat result = new Mat();
         resize(mat, result, new Size(w, h));
         return new ImageWritable(frameConverter.convert(result));
+    }
+
+    protected FrameConverter<Mat> getSafeConverter(long threadId) {
+        if(safeConverter.containsKey(threadId))
+            return (FrameConverter<Mat>) safeConverter.get(Thread.currentThread().getId());
+        else {
+            FrameConverter<Mat> converter = new OpenCVFrameConverter.ToMat();
+            safeConverter.put(threadId, converter);
+            return converter;
+        }
     }
 
 }

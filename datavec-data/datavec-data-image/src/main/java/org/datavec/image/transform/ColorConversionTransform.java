@@ -15,8 +15,11 @@
  */
 package org.datavec.image.transform;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
+import org.bytedeco.javacv.FrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.datavec.image.data.ImageWritable;
 
@@ -49,6 +52,7 @@ public class ColorConversionTransform extends BaseImageTransform {
     public ColorConversionTransform(Random random, int conversionCode) {
         super(random);
         this.conversionCode = conversionCode;
+        this.safeConverter = new HashMap<>();
     }
 
     /**
@@ -64,7 +68,7 @@ public class ColorConversionTransform extends BaseImageTransform {
         if (image == null) {
             return null;
         }
-        OpenCVFrameConverter<Mat> frameConverter = new OpenCVFrameConverter.ToMat();
+        FrameConverter<Mat> frameConverter = getSafeConverter(Thread.currentThread().getId());
         Mat mat = frameConverter.convert(image.getFrame());
 
         Mat result = new Mat();
@@ -76,6 +80,16 @@ public class ColorConversionTransform extends BaseImageTransform {
         }
 
         return new ImageWritable(frameConverter.convert(result));
+    }
+
+    protected FrameConverter<Mat> getSafeConverter(long threadId) {
+        if(safeConverter.containsKey(threadId))
+            return (FrameConverter<Mat>) safeConverter.get(Thread.currentThread().getId());
+        else {
+            FrameConverter<Mat> converter = new OpenCVFrameConverter.ToMat();
+            safeConverter.put(threadId, converter);
+            return converter;
+        }
     }
 
 

@@ -15,10 +15,15 @@
  */
 package org.datavec.image.transform;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
+import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacv.FFmpegFrameFilter;
+import org.bytedeco.javacv.FrameConverter;
 import org.bytedeco.javacv.FrameFilter;
+import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.datavec.image.data.ImageWritable;
 
 import static org.bytedeco.javacpp.avutil.*;
@@ -32,7 +37,7 @@ import static org.bytedeco.javacpp.avutil.*;
  */
 public class FilterImageTransform extends BaseImageTransform {
 
-//    FFmpegFrameFilter filter; // TODO: this isn't thread-safe, but is this going to be performant?
+    private Map<Long, FFmpegFrameFilter> safeFilter;
     private String filters;
     private int height;
     private int width;
@@ -61,13 +66,8 @@ public class FilterImageTransform extends BaseImageTransform {
         if (pixelFormat == AV_PIX_FMT_NONE) {
             throw new IllegalArgumentException("Unsupported number of channels: " + channels);
         }
-    }
-
-    private FrameFilter getFilter() {
-        FrameFilter filter = new FFmpegFrameFilter(filters, width, height);
-        filter.setPixelFormat(pixelFormat);
-
-        return filter;
+        this.filters = filters;
+        this.safeFilter = new HashMap<>();
     }
 
     @Override
@@ -75,7 +75,7 @@ public class FilterImageTransform extends BaseImageTransform {
         if (image == null) {
             return null;
         }
-        FrameFilter filter = getFilter();
+        FrameFilter filter = getSafeFilter(Thread.currentThread().getId());
 
         try {
             filter.start();
@@ -87,6 +87,21 @@ public class FilterImageTransform extends BaseImageTransform {
         }
 
         return image;
+    }
+
+    protected FFmpegFrameFilter getSafeFilter(long threadId) {
+        if(safeFilter.containsKey(threadId))
+            return safeFilter.get(Thread.currentThread().getId());
+        else {
+            FFmpegFrameFilter filter = new FFmpegFrameFilter(filters, width, height);
+            filter.setPixelFormat(pixelFormat);
+            safeConverter.put(threadId, filter);
+            return filter;
+        }
+    }
+
+    protected FrameConverter<opencv_core.Mat> getSafeConverter(long threadId) {
+        throw new UnsupportedOperationException("Converters are not used in FilterImageTransform");
     }
 
 }

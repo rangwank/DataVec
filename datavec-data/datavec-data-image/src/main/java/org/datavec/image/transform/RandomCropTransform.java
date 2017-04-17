@@ -15,7 +15,10 @@
  */
 package org.datavec.image.transform;
 
+import java.util.HashMap;
 import java.util.Random;
+
+import org.bytedeco.javacv.FrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.datavec.image.data.ImageWritable;
 import org.datavec.image.transform.BaseImageTransform;
@@ -48,6 +51,7 @@ public class RandomCropTransform extends BaseImageTransform<Mat> {
         this.outputWidth = width;
         this.rng = Nd4j.getRandom();
         rng.setSeed(seed);
+        this.safeConverter = new HashMap<>();
     }
 
     /**
@@ -62,7 +66,7 @@ public class RandomCropTransform extends BaseImageTransform<Mat> {
         if (image == null) {
             return null;
         }
-        OpenCVFrameConverter<Mat> frameConverter = new OpenCVFrameConverter.ToMat();
+        FrameConverter<Mat> frameConverter = getSafeConverter(Thread.currentThread().getId());
 
         // ensure that transform is valid
         if (image.getFrame().imageHeight < outputHeight || image.getFrame().imageWidth < outputWidth)
@@ -84,6 +88,16 @@ public class RandomCropTransform extends BaseImageTransform<Mat> {
         Mat result = mat.apply(new Rect(x, y, outputWidth, outputHeight));
 
         return new ImageWritable(frameConverter.convert(result));
+    }
+
+    protected FrameConverter<Mat> getSafeConverter(long threadId) {
+        if(safeConverter.containsKey(threadId))
+            return (FrameConverter<Mat>) safeConverter.get(Thread.currentThread().getId());
+        else {
+            FrameConverter<Mat> converter = new OpenCVFrameConverter.ToMat();
+            safeConverter.put(threadId, converter);
+            return converter;
+        }
     }
 
 }
