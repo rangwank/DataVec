@@ -17,6 +17,7 @@
 package org.datavec.image.recordreader;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.datavec.api.berkeley.Pair;
@@ -44,7 +45,9 @@ import java.net.URI;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Base class for the image record reader
@@ -78,14 +81,10 @@ public abstract class BaseImageRecordReader extends BaseRecordReader {
     /*
         fields for background prefetch
      */
-    protected int bufferSize = 128;
-    @Getter
     protected BlockingQueue<Pair<File, ? extends List<Writable>>> buffer;
     protected PrefetchThread prefetchThread;
-    @Getter
-    protected Pair<File,? extends List<Writable>> terminator = new Pair<>(new File(""), new ArrayList<Writable>()); //TODO classcastexception
-    protected Pair<File,? extends List<Writable>> nextElement;
-    protected AtomicBoolean shouldWork = new AtomicBoolean(true);
+    protected Pair<File, ? extends List<Writable>> nextElement;
+    protected Pair<File, ? extends List<Writable>> terminator = new Pair<>(new File(""), new ArrayList<Writable>());
 
     public BaseImageRecordReader() {}
 
@@ -169,7 +168,7 @@ public abstract class BaseImageRecordReader extends BaseRecordReader {
         //To ensure consistent order for label assignment (irrespective of file iteration order), we want to sort the list of labels
         Collections.sort(labels);
 
-        initPrefetch();
+        startPrefetch();
     }
 
 
@@ -220,22 +219,13 @@ public abstract class BaseImageRecordReader extends BaseRecordReader {
         initialize(conf, split);
     }
 
-    private void initPrefetch() {
-        this.buffer = new LinkedBlockingQueue<>(bufferSize);
-        this.prefetchThread = new PrefetchThread(iter, this.buffer, terminator);
-        prefetchThread.start();
-    }
-
     @Override
     public boolean hasNext() {
         try {
-            if (nextElement != null && nextElement != terminator) {
-                return true;
-            }
-            nextElement = buffer.take();
-            if (nextElement == terminator)
+            if (prefetchThread != null)
+                return prefetchThread.hasMore();
+            else
                 return false;
-            return true;
         } catch (Exception e) {
             log.error("Premature end of loop!");
             return false;
@@ -244,7 +234,7 @@ public abstract class BaseImageRecordReader extends BaseRecordReader {
 
     @Override
     public List<Writable> next() {
-        Pair<File,? extends List<Writable>> temp = nextElement;
+        Pair<File,? extends List<Writable>> temp = prefetchThread.nextElement();
         currentFile = temp.getFirst();
         nextElement = null;
         return temp.getSecond();
@@ -332,17 +322,6 @@ public abstract class BaseImageRecordReader extends BaseRecordReader {
         this.labels = labels;
     }
 
-    @Override
-    public void reset() {
-        if (inputSplit == null)
-            throw new UnsupportedOperationException("Cannot reset without first initializing");
-        inputSplit.reset();
-        if (iter != null) {
-            iter = new FileFromPathIterator(inputSplit.locationsPathIterator());
-        }
-        initPrefetch();
-    }
-
     /**
      * Returns {@code getLabels().size()}.
      */
@@ -364,51 +343,59 @@ public abstract class BaseImageRecordReader extends BaseRecordReader {
     }
 
     public void shutdown() {
-        if (shouldWork.get()) {
-            shouldWork.set(false);
-            prefetchThread.interrupt();
-            try {
-                // Shutdown() should be a synchronous operation since the iterator is reset after shutdown() is
-                // called in AsyncLabelAwareIterator.reset().
-                prefetchThread.join();
-            } catch (InterruptedException e) {
+        prefetchThread.stopWork();
+    }
 
-            }
-            nextElement = terminator;
+    @Override
+    public void reset() {
+        if (inputSplit == null)
+            throw new UnsupportedOperationException("Cannot reset without first initializing");
+        inputSplit.reset();
+        if (iter != null) {
+            iter = new FileFromPathIterator(inputSplit.locationsPathIterator());
+        }
+        if (prefetchThread != null) {
+            prefetchThread.reset();
+            prefetchThread.setIterator(iter);
         }
     }
 
+    private void startPrefetch() {
+        this.buffer = new LinkedBlockingQueue<>();
+        this.prefetchThread = new PrefetchThread(iter, this.buffer);
+        prefetchThread.start();
+    }
 
     private class PrefetchThread extends Thread implements Runnable {
+        @Setter
         private Iterator<File> iterator;
         private BlockingQueue<Pair<File,? extends List<Writable>>> buffer;
-        private Pair<File,? extends List<Writable>> terminator;
+        private AtomicBoolean shouldWork = new AtomicBoolean(true);
+        private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
         public PrefetchThread(
                 Iterator<File> iterator,
-                BlockingQueue<Pair<File,? extends List<Writable>>> buffer,
-                Pair<File,? extends List<Writable>> terminator) {
+                BlockingQueue<Pair<File,? extends List<Writable>>> buffer) {
             this.buffer = buffer;
             this.iterator = iterator;
-            this.terminator = terminator;
 
             setDaemon(true);
-            setName("ImageRecordReader prefetch prefetchThread");
+            setName("ImageRecordReader prefetch Thread");
         }
 
         @Override
         public void run() {
             try {
-                while (iterator.hasNext() && shouldWork.get()) {
+                while (shouldWork.get()) {
                     List<Writable> ret;
-                    if (iterator != null) {
-                        File image = iterator.next();
-                        currentFile = image;
+                    if(iterator != null) {
+                        if (iterator.hasNext()) {
+                            File image = iterator.next();
+                            currentFile = image;
 
-                        if (image.isDirectory()) {
-                            // do nothing
-                        } else {
-                            try {
+                            if (image.isDirectory()) {
+                                // do nothing
+                            } else {
                                 invokeListeners(image);
                                 INDArray row = imageLoader.asMatrix(image);
                                 ret = RecordConverter.toRecord(row);
@@ -416,22 +403,48 @@ public abstract class BaseImageRecordReader extends BaseRecordReader {
                                     ret.add(new IntWritable(labels.indexOf(getLabel(image.getPath()))));
 
                                 buffer.put(new Pair<>(image, ret));
-
-                            } catch (Exception e) {
-                                throw new RuntimeException(e);
                             }
                         }
                     }
                 }
-                buffer.put(terminator);
 
-            } catch (InterruptedException e) {
-                // do nothing
-                shouldWork.set(false);
             } catch (Exception e) {
                 // TODO: pass that forward
                 throw new RuntimeException(e);
             }
+        }
+
+        public boolean hasMore() {
+            if(!buffer.isEmpty())
+                return true;
+            else
+                return iterator.hasNext();
+        }
+
+        public Pair<File,? extends List<Writable>> nextElement() {
+            if (!buffer.isEmpty())
+                return buffer.poll();
+
+            try {
+                return buffer.poll(500L, TimeUnit.MILLISECONDS);
+            } catch (Exception e) {
+                return null;
+            }
+        }
+
+        public void reset() {
+            try {
+//                lock.writeLock().lock();
+                buffer.clear();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            } finally {
+//                lock.writeLock().unlock();
+            }
+        }
+
+        public void stopWork() {
+            shouldWork.set(false);
         }
     }
 }
