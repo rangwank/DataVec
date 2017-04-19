@@ -216,7 +216,10 @@ public class NativeImageLoader extends BaseImageLoader {
     public INDArray asMatrix(Mat image) throws IOException {
         OpenCVFrameConverter<Mat> frameConverter = new OpenCVFrameConverter.ToMat();
         ImageWritable writable = new ImageWritable(frameConverter.convert(image));
-        writable = imageTransform.transform(writable);
+
+        if (imageTransform !=null)
+            writable = imageTransform.transform(writable);
+
         image = frameConverter.convert(writable.getFrame());
 
         if (channels > 0 && image.channels() != channels) {
