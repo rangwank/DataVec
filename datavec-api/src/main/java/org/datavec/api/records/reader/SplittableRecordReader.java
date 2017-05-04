@@ -17,7 +17,7 @@ public interface SplittableRecordReader extends RecordReader {
     /**
      * This method ensures specified number of independent splits will be available
      *
-     * @param numParts
+     * @param numParts Number of independent splits that will be used by ParallelDataSetIterator
      */
     void configureSplit(int numParts);
 
