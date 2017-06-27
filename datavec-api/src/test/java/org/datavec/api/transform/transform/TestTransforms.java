@@ -23,7 +23,7 @@ import org.datavec.api.transform.reduce.IAssociativeReducer;
 import org.datavec.api.transform.reduce.Reducer;
 import org.datavec.api.transform.schema.SequenceSchema;
 import org.datavec.api.transform.sequence.ReduceSequenceTransform;
-import org.datavec.api.transform.sequence.nlp.TextToSequenceExpansionTransform;
+import org.datavec.api.transform.sequence.nlp.TextToIntegerSequenceTransform;
 import org.datavec.api.transform.sequence.trim.SequenceTrimTransform;
 import org.datavec.api.transform.transform.categorical.*;
 import org.datavec.api.transform.transform.column.*;
@@ -1304,7 +1304,7 @@ public class TestTransforms {
 
         String newColName = "idxs";
 
-        Transform t = new TextToSequenceExpansionTransform("textcol", newColName, new DefaultVocabProvider(new DefaultVocabulary(v)));
+        Transform t = new TextToIntegerSequenceTransform("textcol", newColName, new DefaultVocabProvider(new DefaultVocabulary(v)));
         t.setInputSchema(s);
 
         Schema sOut = t.transform(s);
@@ -1318,10 +1318,6 @@ public class TestTransforms {
 
         List<List<Writable>> seqOut = t.mapSequence(seqIn);
 
-//        for(List<Writable> l : seqOut){
-//            System.out.println(l);
-//        }
-
         List<List<Writable>> expected = Arrays.asList(
                 Arrays.<Writable>asList(new DoubleWritable(1.0), new IntWritable(v.indexOf("cat")), new IntWritable(2)),
                 Arrays.<Writable>asList(new DoubleWritable(1.0), new IntWritable(v.indexOf("dog")), new IntWritable(2)),
@@ -1329,5 +1325,17 @@ public class TestTransforms {
 
         assertEquals(expected, seqOut);
 
+
+        //Test multiple step expansion
+        seqIn = Arrays.asList(
+                Arrays.<Writable>asList(new DoubleWritable(1.0), new Text("a cat, the Dog, and more than one JAGUAR!"), new IntWritable(2)),
+                Arrays.<Writable>asList(new DoubleWritable(3.0), new Text("elephant and fish?"), new IntWritable(4)));
+
+        expected = new ArrayList<>(expected);
+        expected.add(Arrays.<Writable>asList(new DoubleWritable(3.0), new IntWritable(v.indexOf("elephant")), new IntWritable(4)));
+        expected.add(Arrays.<Writable>asList(new DoubleWritable(3.0), new IntWritable(v.indexOf("fish")), new IntWritable(4)));
+
+        seqOut = t.mapSequence(seqIn);
+        assertEquals(expected, seqOut);
     }
 }
