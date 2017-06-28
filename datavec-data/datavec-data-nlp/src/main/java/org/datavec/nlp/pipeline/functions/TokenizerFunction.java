@@ -14,7 +14,6 @@ import java.util.Iterator;
  * @author raver119@gmail.com
  */
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 public class TokenizerFunction extends AbstractSplitFunction<String> implements SplitFunction<String> {
     protected TokenizerFactory tokenizerFactory;

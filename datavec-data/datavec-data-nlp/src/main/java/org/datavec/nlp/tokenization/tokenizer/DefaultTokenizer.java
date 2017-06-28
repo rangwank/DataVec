@@ -21,7 +21,8 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 /**
- * Default tokenizer
+ * Default tokenizer, splits string by whitespace
+ *
  * @author Adam Gibson
  */
 public class DefaultTokenizer implements Tokenizer {

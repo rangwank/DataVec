@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
+ * This function provides static replacements functionality using regular expressions
  * @author raver119@gmail.com
  */
 @Data
