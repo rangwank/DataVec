@@ -1,4 +1,4 @@
-package org.datavec.api.pipelines.functions.nlp;
+package org.datavec.nlp.pipeline.functions;
 
 import org.datavec.api.pipelines.api.ConverterFunction;
 import org.nd4j.linalg.api.ndarray.INDArray;

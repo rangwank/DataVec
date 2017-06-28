@@ -9,4 +9,6 @@ import java.util.Iterator;
 public interface SplitFunction<T> extends Function<T>  {
 
     Iterator<T> call(Iterator<T> input);
+
+    Iterator<T> split(T input);
 }
