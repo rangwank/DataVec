@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.datavec.api.pipelines.api.AccumulationFunction;
+import org.datavec.api.pipelines.functions.abstracts.AbstractFunction;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
@@ -20,7 +21,7 @@ import java.util.Iterator;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BatchFunction implements AccumulationFunction<INDArray> {
+public class BatchFunction extends AbstractFunction implements AccumulationFunction<INDArray> {
     @Builder.Default protected int batchSize = 8;
 
     @Override

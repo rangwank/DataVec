@@ -7,9 +7,9 @@ import java.util.Iterator;
  *
  * @author raver119@gmail.com
  */
-public interface PassthroughFunction<T> extends Function<T> {
+public interface PassthroughFunction<IN> extends Function<IN> {
 
-    Iterator<T> call(Iterator<T> input);
+    Iterator<IN> call(Iterator<IN> input);
 
-    Iterator<T> call(T... input);
+    Iterator<IN> call(IN... input);
 }

@@ -6,9 +6,9 @@ import java.util.Iterator;
 /**
  * @author raver119@gmail.com
  */
-public interface SplitFunction<T> extends Function<T>  {
+public interface SplitFunction<IN> extends Function<IN>  {
 
-    Iterator<T> call(Iterator<T> input);
+    Iterator<IN> call(Iterator<IN> input);
 
-    Iterator<T> split(T input);
+    Iterator<IN> split(IN input);
 }

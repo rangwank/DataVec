@@ -5,6 +5,7 @@ import java.io.Serializable;
 /**
  * @author raver119@gmail.com
  */
-public interface Function<IN> extends PipelineFunction {
-    IN call(IN input);
+public interface PipelineFunction extends Serializable {
+
+    void attach(PipelineFunction function);
 }

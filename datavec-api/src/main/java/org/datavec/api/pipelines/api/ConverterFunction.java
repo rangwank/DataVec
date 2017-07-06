@@ -9,7 +9,7 @@ import java.util.Iterator;
  *
  * @author raver119@gmail.com
  */
-public interface ConverterFunction<T, O> extends Function2<T, O> {
+public interface ConverterFunction<IN, OUT> extends Function2<IN, OUT> {
 
-    Iterator<O> call(Iterator<T> input);
+    Iterator<OUT> call(Iterator<IN> input);
 }

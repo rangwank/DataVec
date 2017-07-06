@@ -8,7 +8,7 @@ import java.util.Iterator;
 /**
  * @author raver119@gmail.com
  */
-public abstract class AbstractSplitFunction<T> implements SplitFunction<T> {
+public abstract class AbstractSplitFunction<T> extends AbstractFunction implements SplitFunction<T> {
 
     @Override
     public T call(T input) {

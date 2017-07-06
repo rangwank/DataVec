@@ -8,7 +8,7 @@ import java.util.Iterator;
 /**
  * @author raver119@gmail.com
  */
-public abstract class AbstractConverterFunction<T, O> implements ConverterFunction<T, O> {
+public abstract class AbstractConverterFunction<T, O> extends AbstractFunction implements ConverterFunction<T, O> {
 
     @Override
     public abstract O call(T input);

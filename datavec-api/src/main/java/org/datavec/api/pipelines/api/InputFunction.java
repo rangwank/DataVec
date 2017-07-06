@@ -5,5 +5,18 @@ import java.util.Iterator;
 /**
  * @author raver119@gmail.com
  */
-public interface InputFunction<T> extends Iterator<T> {
+public interface InputFunction<IN> extends Iterator<IN> {
+
+    /**
+     * This method adds given Iterator as input source
+     *
+     * @param source
+     */
+    void addDataSource(Iterator<IN> source);
+
+    /**
+     * This method adds single DataSample to the Input
+     * @param sample
+     */
+    void addDataSample(IN sample);
 }
