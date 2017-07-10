@@ -25,6 +25,8 @@ public class Pipeline<IN> implements Serializable {
 
     protected transient InputFunction<IN> inputFunction;
 
+    protected IN finalOne;
+
     protected PipelineFunction<IN> firstFunction;
     protected PipelineFunction<IN> lastFunction;
 
@@ -47,6 +49,7 @@ public class Pipeline<IN> implements Serializable {
         inputFunction = new PipelineInputFunction<>(this);
 
         firstFunction = new TransparentFunction<>();
+        lastFunction = firstFunction;
     }
 
     public Pipeline(@NonNull Builder<IN> builder) {
@@ -93,6 +96,8 @@ public class Pipeline<IN> implements Serializable {
 
         // here we want to create new Pipeline, out of this one
         Pipeline<OUT> nextPipe = new Pipeline<OUT>(this);
+
+        // output of convert function is input of next pipeline
         function.attachInputFunction(nextPipe.inputFunction);
         postPipelines.add(nextPipe);
 
@@ -137,8 +142,14 @@ public class Pipeline<IN> implements Serializable {
             firstFunction.execute(sample);
 
             // and return output of next pipeline
-            return (IN) postPipelines.get(0).firstFunction.execute(sample);
+            //postPipelines.get(0).firstFunction.execute(sample);
+            postPipelines.get(0).passthrough();
+            return null;
         }
+    }
+
+    protected void passthrough() {
+        finalOne = firstFunction.execute(inputFunction.next());
     }
 
     protected class PipelineIterator implements Iterator<IN> {
@@ -194,10 +205,11 @@ public class Pipeline<IN> implements Serializable {
                 // we're passing next() block of data through functions of this pipeline
                 return pipeline.passthrough(pipeline.inputFunction.next());
             } else {
-                // we're invoking pipeline from the very beginning
+                // we're invoking pipeline from the very beginning till the very end
                 pipeline.prePipelines.get(0).passthrough(pipeline.prePipelines.get(0).inputFunction.next());
 
-                return pipeline.passthrough(pipeline.inputFunction.next());
+                // we just extract next element
+                return finalOne; //pipeline.passthrough(pipeline.inputFunction.next());
             }
         }
 

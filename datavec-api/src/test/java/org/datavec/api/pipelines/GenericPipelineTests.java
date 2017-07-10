@@ -135,4 +135,45 @@ public class GenericPipelineTests {
         assertEquals(3, cnt);
     }
 
+    @Test
+    public void testBasicConversion2() throws Exception {
+        List<Integer> list = new ArrayList<>();
+        list.add(1);
+        list.add(2);
+        list.add(3);
+
+        InputFunction<Integer> inputFunction = new IteratorInputFunction<>(list.iterator());
+        Pipeline<Integer> pipeline = new Pipeline.Builder<Integer>(inputFunction)
+                .build();
+
+
+        Iterator<String> iterator = pipeline.map(new AbstractFunction<Integer>() {
+            @Override
+            public Integer call(Integer input) {
+                return input * 2;
+            }
+        }).convert(new AbstractConverterFunction<Integer, String>() {
+
+            @Override
+            public String convert(Integer input) {
+                log.info("Convert called");
+                return String.valueOf(input);
+            }
+        }).map(new AbstractFunction<String>() {
+            @Override
+            public String call(String input) {
+                return "String is: " + input;
+            }
+        }).iterator();
+
+        int cnt = 0;
+        while (iterator.hasNext()) {
+            String curr = iterator.next();
+            assertEquals("Failed at " + cnt, "String is: " + String.valueOf(list.get(cnt) * 2),curr);
+            cnt++;
+        }
+
+        assertEquals(3, cnt);
+    }
+
 }

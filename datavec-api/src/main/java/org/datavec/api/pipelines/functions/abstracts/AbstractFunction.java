@@ -1,6 +1,7 @@
 package org.datavec.api.pipelines.functions.abstracts;
 
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.pipelines.api.Function;
 import org.datavec.api.pipelines.api.PipelineFunction;
 
@@ -10,6 +11,7 @@ import java.util.concurrent.LinkedTransferQueue;
 /**
  * @author raver119@gmail.com
  */
+@Slf4j
 public abstract class AbstractFunction<IN> implements PipelineFunction<IN>, Function<IN> {
     protected PipelineFunction<IN> prevFunction;
     protected PipelineFunction<IN> nextFunction;
@@ -18,6 +20,7 @@ public abstract class AbstractFunction<IN> implements PipelineFunction<IN>, Func
 
     @Override
     public IN execute(IN input) {
+        log.info("Execute on input [{}]", input);
         if (nextFunction != null)
             return nextFunction.execute(call(input));
         else return call(input);

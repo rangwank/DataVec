@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PipelineInputFunction<IN> implements InputFunction<IN> {
     protected transient Queue<IN> queue = new LinkedTransferQueue<>();
     protected transient AtomicInteger queuePosition = new AtomicInteger(0);
+    protected AtomicInteger cnt = new AtomicInteger(0);
 
     public PipelineInputFunction(Pipeline<IN> pipeline) {
         // we'll be typecasting here probably, because pipeline can have any Input type :/
@@ -45,6 +46,10 @@ public class PipelineInputFunction<IN> implements InputFunction<IN> {
 
     @Override
     public IN next() {
+//        log.info("PIF next()");
+//        if (cnt.incrementAndGet() == 2)
+//            throw new RuntimeException();
+
         queuePosition.decrementAndGet();
         return queue.poll();
     }
