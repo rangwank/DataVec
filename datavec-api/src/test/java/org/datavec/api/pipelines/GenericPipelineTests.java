@@ -1,5 +1,6 @@
 package org.datavec.api.pipelines;
 
+import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.pipelines.api.Function;
 import org.datavec.api.pipelines.api.InputFunction;
 import org.datavec.api.pipelines.api.PipelineFunction;
@@ -17,6 +18,7 @@ import static org.junit.Assert.*;
 /**
  * @author raver119@gmail.com
  */
+@Slf4j
 public class GenericPipelineTests {
 
     @Test(expected = IllegalStateException.class)
@@ -126,7 +128,7 @@ public class GenericPipelineTests {
         int cnt = 0;
         while (iterator.hasNext()) {
             String curr = iterator.next();
-            assertEquals(String.valueOf(list.get(cnt * 2)),curr);
+            assertEquals(String.valueOf(list.get(cnt) * 2),curr);
             cnt++;
         }
 

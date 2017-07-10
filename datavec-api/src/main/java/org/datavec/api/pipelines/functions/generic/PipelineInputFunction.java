@@ -1,5 +1,6 @@
 package org.datavec.api.pipelines.functions.generic;
 
+import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.pipelines.Pipeline;
 import org.datavec.api.pipelines.api.InputFunction;
 
@@ -15,11 +16,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  * In future this class should be removed, and replaced by IteratorInputFunction
  * @author raver119@gmail.com
  */
+@Slf4j
 public class PipelineInputFunction<IN> implements InputFunction<IN> {
     protected transient Queue<IN> queue = new LinkedTransferQueue<>();
     protected transient AtomicInteger queuePosition = new AtomicInteger(0);
 
-    public PipelineInputFunction(Pipeline pipeline) {
+    public PipelineInputFunction(Pipeline<IN> pipeline) {
         // we'll be typecasting here probably, because pipeline can have any Input type :/
 
     }
@@ -31,6 +33,7 @@ public class PipelineInputFunction<IN> implements InputFunction<IN> {
 
     @Override
     public void addDataSample(IN sample) {
+        log.info("Adding sample");
         queue.add(sample);
         queuePosition.incrementAndGet();
     }
@@ -42,6 +45,7 @@ public class PipelineInputFunction<IN> implements InputFunction<IN> {
 
     @Override
     public IN next() {
+        queuePosition.decrementAndGet();
         return queue.poll();
     }
 

@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.pipelines.api.*;
 import org.datavec.api.pipelines.engine.Engine;
 import org.datavec.api.pipelines.functions.abstracts.AbstractFunction;
+import org.datavec.api.pipelines.functions.generic.PipelineInputFunction;
+import org.datavec.api.pipelines.functions.generic.TransparentFunction;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -42,8 +44,9 @@ public class Pipeline<IN> implements Serializable {
 
     protected <I> Pipeline(@NonNull Pipeline<I> pipeline) {
         prePipelines.add(pipeline);
+        inputFunction = new PipelineInputFunction<>(this);
 
-        //firstFunction = (PipelineFunction<IN>) function;
+        firstFunction = new TransparentFunction<>();
     }
 
     public Pipeline(@NonNull Builder<IN> builder) {
@@ -90,6 +93,7 @@ public class Pipeline<IN> implements Serializable {
 
         // here we want to create new Pipeline, out of this one
         Pipeline<OUT> nextPipe = new Pipeline<OUT>(this);
+        function.attachInputFunction(nextPipe.inputFunction);
         postPipelines.add(nextPipe);
 
         return nextPipe;
@@ -125,7 +129,16 @@ public class Pipeline<IN> implements Serializable {
 
 
     protected IN passthrough(IN sample) {
-        return firstFunction.execute(sample);
+        log.info("Execution passthrough: {}", firstFunction.getClass().getCanonicalName());
+        if (postPipelines.size() == 0) {
+            return firstFunction.execute(sample);
+        } else {
+            // we need to pass data through this pipeline
+            firstFunction.execute(sample);
+
+            // and return output of next pipeline
+            return (IN) postPipelines.get(0).firstFunction.execute(sample);
+        }
     }
 
     protected class PipelineIterator implements Iterator<IN> {
@@ -181,7 +194,10 @@ public class Pipeline<IN> implements Serializable {
                 // we're passing next() block of data through functions of this pipeline
                 return pipeline.passthrough(pipeline.inputFunction.next());
             } else {
-                return (IN) pipeline.prePipelines.get(0).passthrough(pipeline.prePipelines.get(0).inputFunction.next());
+                // we're invoking pipeline from the very beginning
+                pipeline.prePipelines.get(0).passthrough(pipeline.prePipelines.get(0).inputFunction.next());
+
+                return pipeline.passthrough(pipeline.inputFunction.next());
             }
         }
 

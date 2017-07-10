@@ -11,5 +11,7 @@ import java.util.Iterator;
  */
 public interface ConverterFunction<IN, OUT> extends Function2<IN, OUT> {
 
+    void attachInputFunction(InputFunction<OUT> inputFunction);
+
     Iterator<OUT> call(Iterator<IN> input);
 }
