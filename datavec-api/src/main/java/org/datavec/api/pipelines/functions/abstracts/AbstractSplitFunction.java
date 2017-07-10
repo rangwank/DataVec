@@ -8,18 +8,13 @@ import java.util.Iterator;
 /**
  * @author raver119@gmail.com
  */
-public abstract class AbstractSplitFunction<T> extends AbstractFunction implements SplitFunction<T> {
+public abstract class AbstractSplitFunction<IN> extends AbstractFunction<IN> implements SplitFunction<IN> {
 
     @Override
-    public T call(T input) {
-        throw new UnsupportedOperationException();
-    }
+    public abstract Iterator<IN> split(IN input);
 
     @Override
-    public abstract Iterator<T> split(T input);
-
-    @Override
-    public Iterator<T> call(final Iterator<T> input) {
+    public Iterator<IN> call(final Iterator<IN> input) {
         return input.hasNext() ? split(input.next()) : null;
     }
 }

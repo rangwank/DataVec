@@ -24,6 +24,10 @@ public class IteratorInputFunction<T> implements InputFunction<T> {
         //
     }
 
+    public IteratorInputFunction(Iterator<T> source) {
+        addDataSource(source);
+    }
+
     @Override
     public void addDataSource(@NonNull Iterator<T> source) {
         iterators.add(source);

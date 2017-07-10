@@ -10,7 +10,7 @@ import java.util.Iterator;
 /**
  * @author raver119@gmail.com
  */
-public class ConcatenateFunction extends AbstractFunction implements AccumulationFunction<INDArray> {
+public class ConcatenateFunction extends AbstractFunction<INDArray> implements AccumulationFunction<INDArray> {
     @Override
     public INDArray call(INDArray input) {
         return null;

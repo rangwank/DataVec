@@ -8,10 +8,8 @@ import java.util.Iterator;
 /**
  * @author raver119@gmail.com
  */
-public abstract class AbstractPassthroughFunction<T> extends AbstractFunction implements PassthroughFunction<T> {
+public abstract class AbstractPassthroughFunction<T> extends AbstractFunction<T> implements PassthroughFunction<T> {
 
-    @Override
-    public abstract T call(T input);
 
     @Override
     public Iterator<T> call(final Iterator<T> input) {

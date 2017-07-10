@@ -21,7 +21,7 @@ import java.util.Iterator;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BatchFunction extends AbstractFunction implements AccumulationFunction<INDArray> {
+public class BatchFunction extends AbstractFunction<INDArray> implements AccumulationFunction<INDArray> {
     @Builder.Default protected int batchSize = 8;
 
     @Override

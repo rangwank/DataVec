@@ -2,7 +2,11 @@ package org.datavec.nlp.pipeline;
 
 import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.pipelines.Pipeline;
+import org.datavec.api.pipelines.api.ConverterFunction;
+import org.datavec.api.pipelines.api.Function;
 import org.datavec.api.pipelines.api.InputFunction;
+import org.datavec.api.pipelines.api.PipelineFunction;
+import org.datavec.api.pipelines.functions.abstracts.AbstractConverterFunction;
 import org.datavec.api.pipelines.functions.generic.IteratorInputFunction;
 import org.datavec.nlp.pipeline.functions.SentenceBreakerFunction;
 import org.datavec.nlp.sentence.SimpleSentenceBreaker;

@@ -5,6 +5,6 @@ import java.io.Serializable;
 /**
  * @author raver119@gmail.com
  */
-public interface Function2<IN, OUT> extends PipelineFunction {
-    OUT call(IN input);
+public interface Function2<IN, OUT> extends PipelineFunction<IN> {
+    OUT convert(IN input);
 }
