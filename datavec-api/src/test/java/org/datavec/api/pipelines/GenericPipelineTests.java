@@ -6,12 +6,11 @@ import org.datavec.api.pipelines.api.InputFunction;
 import org.datavec.api.pipelines.api.PipelineFunction;
 import org.datavec.api.pipelines.functions.abstracts.AbstractConverterFunction;
 import org.datavec.api.pipelines.functions.abstracts.AbstractFunction;
+import org.datavec.api.pipelines.functions.abstracts.AbstractSplitFunction;
 import org.datavec.api.pipelines.functions.generic.IteratorInputFunction;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -176,4 +175,74 @@ public class GenericPipelineTests {
         assertEquals(3, cnt);
     }
 
+    @Test
+    public void testSplitFunction1() throws Exception {
+        List<String> list = new ArrayList<>();
+        list.add(String.valueOf(1));
+        list.add(String.valueOf(2));
+        list.add(String.valueOf(3));
+
+        InputFunction<String> inputFunction = new IteratorInputFunction<>();
+        inputFunction.addDataSample("1 2 3");
+
+
+        Pipeline<String> pipeline = new Pipeline.Builder<String>(inputFunction)
+                .build();
+
+        Iterator<String> iterator = pipeline.split(new AbstractSplitFunction<String>() {
+            @Override
+            public Iterator<String> split(String input) {
+                return Arrays.asList(input.split(" ")).iterator();
+            }
+        }).iterator();
+
+
+        int cnt = 0;
+        while (iterator.hasNext()) {
+            String curr = iterator.next();
+            assertEquals("Failed at " + cnt, list.get(cnt), curr);
+            cnt++;
+        }
+
+        assertEquals(3, cnt);
+    }
+
+    @Test
+    public void testSplitFunction2() throws Exception {
+        List<Integer> list = new ArrayList<>();
+        list.add(1);
+        list.add(2);
+        list.add(3);
+
+        InputFunction<String> inputFunction = new IteratorInputFunction<>();
+        inputFunction.addDataSample("1 2 3");
+
+
+        Pipeline<String> pipeline = new Pipeline.Builder<String>(inputFunction)
+                .build();
+
+        Iterator<Integer> iterator = pipeline.split(new AbstractSplitFunction<String>() {
+            @Override
+            public Iterator<String> split(String input) {
+                return Arrays.asList(input.split(" ")).iterator();
+            }
+        }).convert(new AbstractConverterFunction<String, Integer>() {
+
+            @Override
+            public Integer convert(String input) {
+                return Integer.valueOf(input);
+            }
+        }).iterator();
+
+
+        int cnt = 0;
+        while (iterator.hasNext()) {
+            log.info("Trying {}", cnt);
+            Integer curr = iterator.next();
+            assertEquals("Failed at " + cnt, list.get(cnt).intValue(), curr.intValue());
+            cnt++;
+        }
+
+        assertEquals(3, cnt);
+    }
 }
