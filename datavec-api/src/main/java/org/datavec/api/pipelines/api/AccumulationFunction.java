@@ -13,4 +13,6 @@ public interface AccumulationFunction<IN> extends Function<IN> {
     Iterator<IN> call(Iterator<IN> input);
 
     Iterator<IN> call(IN... input);
+
+    IN accumulate(Iterator<IN> input);
 }

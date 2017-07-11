@@ -25,4 +25,9 @@ public class ConcatenateFunction extends AbstractFunction<INDArray> implements A
     public Iterator<INDArray> call(INDArray... input) {
         return null;
     }
+
+    @Override
+    public INDArray accumulate(Iterator<INDArray> input) {
+        return null;
+    }
 }

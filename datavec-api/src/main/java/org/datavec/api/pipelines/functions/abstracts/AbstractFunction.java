@@ -17,6 +17,10 @@ public abstract class AbstractFunction<IN> implements PipelineFunction<IN>, Func
     protected PipelineFunction<IN> nextFunction;
     protected Queue<IN> queue = new LinkedTransferQueue<>();
 
+    @Override
+    public boolean isGreedyFunction() {
+        return false;
+    }
 
     @Override
     public IN execute(IN input) {

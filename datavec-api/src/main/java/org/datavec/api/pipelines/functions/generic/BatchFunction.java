@@ -38,4 +38,9 @@ public class BatchFunction extends AbstractFunction<INDArray> implements Accumul
     public Iterator<INDArray> call(INDArray... input) {
         return null;
     }
+
+    @Override
+    public INDArray accumulate(Iterator<INDArray> input) {
+        return null;
+    }
 }

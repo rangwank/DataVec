@@ -12,6 +12,8 @@ public interface PipelineFunction<IN> extends Serializable {
 
     boolean hasNext();
 
+    boolean isGreedyFunction();
+
     void store(IN input);
 
     IN call(IN input);

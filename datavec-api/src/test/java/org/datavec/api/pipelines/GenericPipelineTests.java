@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.pipelines.api.Function;
 import org.datavec.api.pipelines.api.InputFunction;
 import org.datavec.api.pipelines.api.PipelineFunction;
+import org.datavec.api.pipelines.functions.abstracts.AbstractAccumulationFunction;
 import org.datavec.api.pipelines.functions.abstracts.AbstractConverterFunction;
 import org.datavec.api.pipelines.functions.abstracts.AbstractFunction;
 import org.datavec.api.pipelines.functions.abstracts.AbstractSplitFunction;
@@ -281,5 +282,52 @@ public class GenericPipelineTests {
         }
 
         assertEquals(3, cnt);
+    }
+
+    @Test
+    public void testAccumumation1() throws Exception {
+        List<Integer> list = new ArrayList<>();
+        list.add(10);
+        list.add(20);
+        list.add(30);
+
+
+        InputFunction<String> inputFunction = new IteratorInputFunction<>();
+        inputFunction.addDataSample("3 3 3 1");
+        inputFunction.addDataSample("3 3 3 1 10");
+        inputFunction.addDataSample("3 3 3 1 10 10");
+
+        Pipeline<String> pipeline = new Pipeline.Builder<String>(inputFunction)
+                .build();
+
+        Iterator<Integer> iterator = pipeline.split(new AbstractSplitFunction<String>() {
+            @Override
+            public Iterator<String> split(String input) {
+                return Arrays.asList(input.split(" ")).iterator();
+            }
+        }).convert(new AbstractConverterFunction<String, Integer>() {
+
+            @Override
+            public Integer convert(String input) {
+                return Integer.valueOf(input);
+            }
+        }).accumulate(new AbstractAccumulationFunction<Integer>() {
+            @Override
+            public Integer accumulate(Iterator<Integer> input) {
+                int accumulatedValue = 0;
+                while (input.hasNext())
+                    accumulatedValue += input.next();
+
+                return accumulatedValue;
+            }
+        }).iterator();
+
+        int cnt = 0;
+        while (iterator.hasNext()) {
+            log.info("Trying {}", cnt);
+            Integer curr = iterator.next();
+            assertEquals("Failed at " + cnt, list.get(cnt).intValue(), curr.intValue());
+            cnt++;
+        }
     }
 }
