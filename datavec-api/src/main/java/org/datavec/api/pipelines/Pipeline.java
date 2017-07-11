@@ -149,7 +149,16 @@ public class Pipeline<IN> implements Serializable {
     }
 
     protected void passthrough() {
-        finalOne = firstFunction.execute(inputFunction.next());
+        if (hasAccumulated()) {
+            finalOne = firstFunction.execute();
+
+            if (postPipelines.size() > 0)
+                postPipelines.get(0).passthrough();
+
+            log.info("Accumulated final one: {}", finalOne);
+        } else {
+            finalOne = firstFunction.execute(inputFunction.next());
+        }
     }
 
     protected class PipelineIterator implements Iterator<IN> {
@@ -205,11 +214,18 @@ public class Pipeline<IN> implements Serializable {
                 // we're passing next() block of data through functions of this pipeline
                 return pipeline.passthrough(pipeline.inputFunction.next());
             } else {
-                // we're invoking pipeline from the very beginning till the very end
-                pipeline.prePipelines.get(0).passthrough(pipeline.prePipelines.get(0).inputFunction.next());
+                if (pipeline.prePipelines.get(0).hasAccumulated()) {
+                    pipeline.prePipelines.get(0).passthrough();
 
-                // we just extract next element
-                return finalOne; //pipeline.passthrough(pipeline.inputFunction.next());
+                    log.info("Going to return: {}", finalOne);
+                    return finalOne;
+                } else {
+                    // we're invoking pipeline from the very beginning till the very end
+                    pipeline.prePipelines.get(0).passthrough(pipeline.prePipelines.get(0).inputFunction.next());
+
+                    // we just extract next element
+                    return finalOne; //pipeline.passthrough(pipeline.inputFunction.next());
+                }
             }
         }
 

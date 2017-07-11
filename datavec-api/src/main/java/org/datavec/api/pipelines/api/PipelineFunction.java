@@ -12,9 +12,13 @@ public interface PipelineFunction<IN> extends Serializable {
 
     boolean hasNext();
 
+    void store(IN input);
+
     IN call(IN input);
 
     IN poll();
 
     IN execute(IN input);
+
+    IN execute();
 }

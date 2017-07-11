@@ -27,6 +27,26 @@ public abstract class AbstractFunction<IN> implements PipelineFunction<IN>, Func
     }
 
     @Override
+    public IN execute() {
+        if (queue.isEmpty()) {
+            if (nextFunction != null)
+                nextFunction.execute();
+
+            return null;
+        } else {
+            IN que = queue.poll();
+            log.info("Queued element: [{}]", que);
+            return execute(que);
+        }
+    }
+
+    @Override
+    public void store(IN input) {
+        log.info("Storing value [{}]", input);
+        queue.add(input);
+    }
+
+    @Override
     public IN poll() {
         // TODO: maybe something better then typecast here?
 
@@ -52,6 +72,7 @@ public abstract class AbstractFunction<IN> implements PipelineFunction<IN>, Func
     @Override
     public void attachNext(@NonNull PipelineFunction function) {
         this.nextFunction = function;
+        function.attachPrev(this);
     }
 
     /**

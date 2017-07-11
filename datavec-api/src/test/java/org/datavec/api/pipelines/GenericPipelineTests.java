@@ -20,6 +20,41 @@ import static org.junit.Assert.*;
 @Slf4j
 public class GenericPipelineTests {
 
+    @Test
+    public void testAccumulatedValues1() throws Exception {
+        AbstractFunction<Integer> function1 = new AbstractFunction<Integer>() {
+            @Override
+            public Integer call(Integer input) {
+                return input + 1;
+            }
+        };
+
+        AbstractFunction<Integer> function2 = new AbstractFunction<Integer>() {
+            @Override
+            public Integer call(Integer input) {
+                return input + 2;
+            }
+        };
+
+        AbstractFunction<Integer> function3 = new AbstractFunction<Integer>() {
+            @Override
+            public Integer call(Integer input) {
+                return input + 3;
+            }
+        };
+
+        function1.attachNext(function2);
+        function2.attachNext(function3);
+
+        // functions have nothing within
+        assertFalse(function3.hasNext());
+
+        // now we're adding something into function2, just to mimic previous split function for example
+        function2.store(5);
+
+        assertTrue(function3.hasNext());
+    }
+
     @Test(expected = IllegalStateException.class)
     public void testBasicBuilder0() throws Exception {
         List<Integer> list = new ArrayList<>();
@@ -230,7 +265,9 @@ public class GenericPipelineTests {
 
             @Override
             public Integer convert(String input) {
-                return Integer.valueOf(input);
+                Integer result = Integer.valueOf(input);
+                log.info("Trying to convert [{}]; Result: {}", input, result);
+                return result;
             }
         }).iterator();
 

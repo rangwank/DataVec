@@ -20,7 +20,7 @@ public abstract class AbstractSplitFunction<IN> extends AbstractFunction<IN> imp
         if (nextFunction != null) {
             IN ret = nextFunction.execute(iterator.next());
             while (iterator.hasNext())
-                nextFunction.execute(iterator.next());
+                nextFunction.store(iterator.next());
 
             return ret;
         }
