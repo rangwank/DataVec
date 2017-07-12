@@ -4,7 +4,10 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.pipelines.api.Function;
 import org.datavec.api.pipelines.api.PipelineFunction;
+import org.datavec.api.pipelines.iterators.ConverterIterator;
+import org.datavec.api.pipelines.iterators.PassthroughIterator;
 
+import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.LinkedTransferQueue;
 
@@ -19,7 +22,14 @@ public abstract class AbstractFunction<IN> implements PipelineFunction<IN>, Func
 
     @Override
     public boolean isGreedyFunction() {
-        return false;
+        if (nextFunction == null) {
+            log.info("Null next");
+            return false;
+        } else {
+            boolean result = nextFunction.isGreedyFunction();
+            log.info("NexT result: {}", result);
+            return result;
+        }
     }
 
     @Override
@@ -28,6 +38,18 @@ public abstract class AbstractFunction<IN> implements PipelineFunction<IN>, Func
         if (nextFunction != null)
             return nextFunction.execute(call(input));
         else return call(input);
+    }
+
+    public IN execute(Iterator<IN> input) {
+        if (nextFunction != null)
+            return nextFunction.execute(new PassthroughIterator<IN>(input, this));
+        else
+            return accumulate(input);
+    }
+
+    @Override
+    public IN accumulate(Iterator<IN> input) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

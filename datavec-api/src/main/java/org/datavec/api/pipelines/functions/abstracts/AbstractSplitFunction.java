@@ -17,18 +17,23 @@ public abstract class AbstractSplitFunction<IN> extends AbstractFunction<IN> imp
         log.info("Trying to split on input [{}]", input);
         Iterator<IN> iterator = split(input);
 
-        if (nextFunction != null) {
-            IN ret = nextFunction.execute(iterator.next());
-            while (iterator.hasNext())
-                nextFunction.store(iterator.next());
+        if (isGreedyFunction()) {
+            // it is possible ONLY if nextFunction != null, because split function can't be accumulator
 
-            return ret;
-        }
-        else {
-            while (iterator.hasNext())
-                queue.add(iterator.next());
+            return nextFunction.execute(iterator);
+        } else {
+            if (nextFunction != null) {
+                IN ret = nextFunction.execute(iterator.next());
+                while (iterator.hasNext())
+                    nextFunction.store(iterator.next());
 
-            return queue.poll();
+                return ret;
+            } else {
+                while (iterator.hasNext())
+                    queue.add(iterator.next());
+
+                return queue.poll();
+            }
         }
     }
 

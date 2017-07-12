@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.datavec.api.pipelines.api.Function;
 import org.datavec.api.pipelines.functions.abstracts.AbstractFunction;
 
+import java.util.Iterator;
+
 /**
  * @author raver119@gmail.com
  */
@@ -13,5 +15,10 @@ public class TransparentFunction<IN> extends AbstractFunction<IN> implements Fun
     public IN call(IN input) {
         log.info("Calling TransparentFunction");
         return input;
+    }
+
+    @Override
+    public IN accumulate(Iterator<IN> input) {
+        throw new UnsupportedOperationException();
     }
 }

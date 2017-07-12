@@ -286,6 +286,95 @@ public class GenericPipelineTests {
 
     @Test
     public void testAccumumation1() throws Exception {
+        List<String> list = new ArrayList<>();
+        list.add("3331");
+        list.add("333110");
+        list.add("33311010");
+
+
+        InputFunction<String> inputFunction = new IteratorInputFunction<>();
+        inputFunction.addDataSample("3 3 3 1");
+        inputFunction.addDataSample("3 3 3 1 10");
+        inputFunction.addDataSample("3 3 3 1 10 10");
+
+        Pipeline<String> pipeline = new Pipeline.Builder<String>(inputFunction)
+                .build();
+
+        Iterator<String> iterator = pipeline.split(new AbstractSplitFunction<String>() {
+            @Override
+            public Iterator<String> split(String input) {
+                return Arrays.asList(input.split(" ")).iterator();
+            }
+        }).accumulate(new AbstractAccumulationFunction<String>() {
+            @Override
+            public String accumulate(Iterator<String> input) {
+                StringBuilder builder = new StringBuilder();
+                int accumulatedValue = 0;
+                while (input.hasNext())
+                    builder.append(input.next());
+
+                return builder.toString();
+            }
+        }).iterator();
+
+        int cnt = 0;
+        while (iterator.hasNext()) {
+            log.info("Trying {}", cnt);
+            String curr = iterator.next();
+            assertEquals("Failed at " + cnt, list.get(cnt), curr);
+            cnt++;
+        }
+    }
+
+    @Test
+    public void testAccumumation2() throws Exception {
+        List<String> list = new ArrayList<>();
+        list.add("3A3A3A1A");
+        list.add("3A3A3A1A10A");
+        list.add("3A3A3A1A10A10A");
+
+
+        InputFunction<String> inputFunction = new IteratorInputFunction<>();
+        inputFunction.addDataSample("3 3 3 1");
+        inputFunction.addDataSample("3 3 3 1 10");
+        inputFunction.addDataSample("3 3 3 1 10 10");
+
+        Pipeline<String> pipeline = new Pipeline.Builder<String>(inputFunction)
+                .build();
+
+        Iterator<String> iterator = pipeline.split(new AbstractSplitFunction<String>() {
+            @Override
+            public Iterator<String> split(String input) {
+                return Arrays.asList(input.split(" ")).iterator();
+            }
+        }).map(new AbstractFunction<String>() {
+            @Override
+            public String call(String input) {
+                return input + "A";
+            }
+        }).accumulate(new AbstractAccumulationFunction<String>() {
+            @Override
+            public String accumulate(Iterator<String> input) {
+                StringBuilder builder = new StringBuilder();
+                int accumulatedValue = 0;
+                while (input.hasNext())
+                    builder.append(input.next());
+
+                return builder.toString();
+            }
+        }).iterator();
+
+        int cnt = 0;
+        while (iterator.hasNext()) {
+            log.info("Trying {}", cnt);
+            String curr = iterator.next();
+            assertEquals("Failed at " + cnt, list.get(cnt), curr);
+            cnt++;
+        }
+    }
+
+    @Test
+    public void testAccumumation3() throws Exception {
         List<Integer> list = new ArrayList<>();
         list.add(10);
         list.add(20);

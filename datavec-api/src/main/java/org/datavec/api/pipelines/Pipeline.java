@@ -105,6 +105,14 @@ public class Pipeline<IN> implements Serializable {
     }
 
     public Pipeline<IN> accumulate(@NonNull AccumulationFunction<IN> function) {
+        if (firstFunction == null) {
+            firstFunction = function;
+            lastFunction = function;
+        } else {
+            // if this is not-a-first function - attachNext it to last function
+            lastFunction.attachNext(function);
+            lastFunction = function;
+        }
 
         return this;
     }
