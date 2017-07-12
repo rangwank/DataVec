@@ -168,6 +168,9 @@ public class Pipeline<IN> implements Serializable {
                 postPipelines.get(0).passthrough();
 
             log.info("Accumulated final one: {}", finalOne);
+            // FIXME: this instanceOf is bad. We need better way to find out how to execute this pipeline: one by one, or all at once
+        } else if (inputFunction instanceof PipelineInputFunction && hasGreedyFunctions()) {
+            finalOne = firstFunction.execute(inputFunction);
         } else {
             finalOne = firstFunction.execute(inputFunction.next());
         }
