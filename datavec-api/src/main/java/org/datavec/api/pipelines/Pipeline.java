@@ -58,6 +58,7 @@ public class Pipeline<IN> implements Serializable {
 
 
     public Pipeline<IN> split(@NonNull SplitFunction<IN> function) {
+        function.registerPipeline(this);
         // if this func is first in pipeline, do not attachNext it anywhere
         if (firstFunction == null) {
             firstFunction = function;
@@ -72,6 +73,7 @@ public class Pipeline<IN> implements Serializable {
     }
 
     public Pipeline<IN> map(@NonNull Function<IN> function) {
+        function.registerPipeline(this);
         if (firstFunction == null) {
             firstFunction = function;
             lastFunction = function;
@@ -85,6 +87,7 @@ public class Pipeline<IN> implements Serializable {
     }
 
     public <OUT> Pipeline<OUT> convert(@NonNull ConverterFunction<IN, OUT> function) {
+        function.registerPipeline(this);
         if (firstFunction == null) {
             firstFunction = function;
             lastFunction = function;
@@ -105,6 +108,7 @@ public class Pipeline<IN> implements Serializable {
     }
 
     public Pipeline<IN> accumulate(@NonNull AccumulationFunction<IN> function) {
+        function.registerPipeline(this);
         if (firstFunction == null) {
             firstFunction = function;
             lastFunction = function;
@@ -166,6 +170,15 @@ public class Pipeline<IN> implements Serializable {
             log.info("Accumulated final one: {}", finalOne);
         } else {
             finalOne = firstFunction.execute(inputFunction.next());
+        }
+    }
+
+
+    public boolean hasGreedyFunctions() {
+        if (postPipelines.size() == 0) {
+            return firstFunction.isGreedyFunction();
+        } else {
+            return postPipelines.get(0).hasGreedyFunctions();
         }
     }
 

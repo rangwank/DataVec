@@ -6,6 +6,7 @@ import org.datavec.api.pipelines.api.ConverterFunction;
 import org.datavec.api.pipelines.api.InputFunction;
 import org.datavec.api.pipelines.iterators.AbstractIterator;
 import org.datavec.api.pipelines.iterators.ConverterIterator;
+import org.datavec.api.pipelines.iterators.PassthroughIterator;
 
 import java.util.Iterator;
 
@@ -28,6 +29,14 @@ public abstract class AbstractConverterFunction<IN, OUT> extends AbstractFunctio
         nextInputFunction.addDataSample(convert(input));
         // this line is irrelevant, output of last function won't be used anywhere
         return input;
+    }
+
+    @Override
+    public IN execute(Iterator<IN> input) {
+        log.info("PEWPEW");
+        // converter is last function in current pipeline guaranteed
+        nextInputFunction.addDataSource(new ConverterIterator<>(input, this));
+        return null;
     }
 
     @Override

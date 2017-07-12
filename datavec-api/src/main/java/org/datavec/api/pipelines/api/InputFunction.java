@@ -19,4 +19,7 @@ public interface InputFunction<IN> extends Iterator<IN> {
      * @param sample
      */
     void addDataSample(IN sample);
+
+
+    boolean hasGreedyConsumers();
 }

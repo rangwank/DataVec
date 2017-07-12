@@ -64,4 +64,10 @@ public class IteratorInputFunction<T> implements InputFunction<T> {
     public void remove() {
         throw new UnsupportedOperationException();
     }
+
+
+    @Override
+    public boolean hasGreedyConsumers() {
+        return false;
+    }
 }

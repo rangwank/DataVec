@@ -17,7 +17,7 @@ public abstract class AbstractSplitFunction<IN> extends AbstractFunction<IN> imp
         log.info("Trying to split on input [{}]", input);
         Iterator<IN> iterator = split(input);
 
-        if (isGreedyFunction()) {
+        if (isGreedyFunction() || pipeline.hasGreedyFunctions()) {
             // it is possible ONLY if nextFunction != null, because split function can't be accumulator
 
             return nextFunction.execute(iterator);

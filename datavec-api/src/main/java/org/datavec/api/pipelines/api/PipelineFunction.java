@@ -1,5 +1,7 @@
 package org.datavec.api.pipelines.api;
 
+import org.datavec.api.pipelines.Pipeline;
+
 import java.io.Serializable;
 import java.util.Iterator;
 
@@ -8,6 +10,7 @@ import java.util.Iterator;
  */
 public interface PipelineFunction<IN> extends Serializable {
 
+    void registerPipeline(Pipeline<IN> pipeline);
     void attachPrev(PipelineFunction<IN> function);
     void attachNext(PipelineFunction<IN> function);
 

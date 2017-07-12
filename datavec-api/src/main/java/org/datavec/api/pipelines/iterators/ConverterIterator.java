@@ -12,7 +12,8 @@ public class ConverterIterator<IN, OUT> implements Iterator<OUT>{
     protected ConverterFunction<IN, OUT> converterFunction;
 
     public ConverterIterator(Iterator<IN> inputIterator, ConverterFunction<IN, OUT> converterFunction) {
-
+        this.inputIterator = inputIterator;
+        this.converterFunction = converterFunction;
     }
 
     @Override
@@ -22,7 +23,7 @@ public class ConverterIterator<IN, OUT> implements Iterator<OUT>{
 
     @Override
     public OUT next() {
-        return (OUT) converterFunction.call(inputIterator.next());
+        return (OUT) converterFunction.convert(inputIterator.next());
     }
 
     @Override

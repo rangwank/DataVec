@@ -17,45 +17,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author raver119@gmail.com
  */
 @Slf4j
-public class PipelineInputFunction<IN> implements InputFunction<IN> {
-    protected transient Queue<IN> queue = new LinkedTransferQueue<>();
-    protected transient AtomicInteger queuePosition = new AtomicInteger(0);
-    protected AtomicInteger cnt = new AtomicInteger(0);
+public class PipelineInputFunction<IN> extends IteratorInputFunction<IN> implements InputFunction<IN> {
+    protected Pipeline<IN> pipeline;
 
     public PipelineInputFunction(Pipeline<IN> pipeline) {
+        super();
         // we'll be typecasting here probably, because pipeline can have any Input type :/
-
+        this.pipeline = pipeline;
     }
 
     @Override
-    public void addDataSource(Iterator<IN> source) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void addDataSample(IN sample) {
-        log.info("Adding sample");
-        queue.add(sample);
-        queuePosition.incrementAndGet();
-    }
-
-    @Override
-    public boolean hasNext() {
-        return queuePosition.get() > 0;
-    }
-
-    @Override
-    public IN next() {
-//        log.info("PIF next()");
-//        if (cnt.incrementAndGet() == 2)
-//            throw new RuntimeException();
-
-        queuePosition.decrementAndGet();
-        return queue.poll();
-    }
-
-    @Override
-    public void remove() {
-        throw new UnsupportedOperationException();
+    public boolean hasGreedyConsumers() {
+        return pipeline.hasGreedyFunctions();
     }
 }

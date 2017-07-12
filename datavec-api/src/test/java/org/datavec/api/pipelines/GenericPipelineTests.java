@@ -403,6 +403,7 @@ public class GenericPipelineTests {
         }).accumulate(new AbstractAccumulationFunction<Integer>() {
             @Override
             public Integer accumulate(Iterator<Integer> input) {
+                log.info("Calling for accumulate");
                 int accumulatedValue = 0;
                 while (input.hasNext())
                     accumulatedValue += input.next();
@@ -415,6 +416,7 @@ public class GenericPipelineTests {
         while (iterator.hasNext()) {
             log.info("Trying {}", cnt);
             Integer curr = iterator.next();
+            assertNotNull("Failed at " + cnt, curr);
             assertEquals("Failed at " + cnt, list.get(cnt).intValue(), curr.intValue());
             cnt++;
         }
