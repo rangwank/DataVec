@@ -16,6 +16,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
+ * This class is backbone of DataVec Pipeline API
+ *
  * @author raver119@gmail.com
  */
 @Slf4j
@@ -57,6 +59,13 @@ public class Pipeline<IN> implements Serializable {
     }
 
 
+    /**
+     * This function will be invoked to split input into separate elements.
+     * I.e. if you have NLP pipeline and your input is sentences before calling for split, after split it can be tokens
+     *
+     * @param function
+     * @return
+     */
     public Pipeline<IN> split(@NonNull SplitFunction<IN> function) {
         function.registerPipeline(this);
         // if this func is first in pipeline, do not attachNext it anywhere
@@ -72,6 +81,13 @@ public class Pipeline<IN> implements Serializable {
         return this;
     }
 
+    /**
+     * This function merges multiple separate pipelines of the same time, producing single element
+     *
+     * @param function
+     * @param pipelines
+     * @return
+     */
     public Pipeline<IN> merge(MergeFunction<IN> function, Pipeline<IN>... pipelines) {
         function.registerPipeline(this);
         if (firstFunction == null) {
@@ -86,6 +102,27 @@ public class Pipeline<IN> implements Serializable {
         return this;
     }
 
+    /**
+     * This function makes all subsequent functions to process inputs from all pipelines passed here.
+     * I.e. if at some point you have 2 independent pipelines, you can unify them, so their output will be eventually included in the same MultiDataSet
+     *
+     * Typically you want this function somewhere at the end of pipelines, when all pipelines have INDArrays as output type
+     *
+     * @param pipelines
+     * @return
+     */
+    public Pipeline<IN> unify(Pipeline<IN>... pipelines) {
+
+
+        return this;
+    }
+
+    /**
+     * This function transforms given input in some way, without any type change
+     *
+     * @param function
+     * @return
+     */
     public Pipeline<IN> map(@NonNull Function<IN> function) {
         function.registerPipeline(this);
         if (firstFunction == null) {
@@ -100,6 +137,14 @@ public class Pipeline<IN> implements Serializable {
         return this;
     }
 
+    /**
+     * This function transforms given input to something else, with type change
+     * I.e. if you have NLP pipeline, you can use convert() to change tokens into vectors.
+     *
+     * @param function
+     * @param <OUT>
+     * @return
+     */
     public <OUT> Pipeline<OUT> convert(@NonNull ConverterFunction<IN, OUT> function) {
         function.registerPipeline(this);
         if (firstFunction == null) {
@@ -121,6 +166,12 @@ public class Pipeline<IN> implements Serializable {
         return nextPipe;
     }
 
+    /**
+     * This function accumulates previously split values (if any) into single element.
+     *
+     * @param function
+     * @return
+     */
     public Pipeline<IN> accumulate(@NonNull AccumulationFunction<IN> function) {
         function.registerPipeline(this);
         if (firstFunction == null) {

@@ -283,6 +283,51 @@ public class GenericPipelineTests {
     }
 
     @Test
+    public void testSplitFunction3() throws Exception {
+        InputFunction<String> inputFunction = new IteratorInputFunction<>();
+        inputFunction.addDataSample("1 1; 2 2;");
+        inputFunction.addDataSample("3 3; 4 4;");
+        inputFunction.addDataSample("5 5; 6 6;");
+
+        List<String> exp = new ArrayList<>();
+        exp.add("1");
+        exp.add("1");
+        exp.add("2");
+        exp.add("2");
+        exp.add("3");
+        exp.add("3");
+        exp.add("4");
+        exp.add("4");
+        exp.add("5");
+        exp.add("5");
+        exp.add("6");
+        exp.add("6");
+
+        Pipeline<String> pipeline = new Pipeline.Builder<String>(inputFunction)
+                .build();
+
+        Iterator<String> iterator = pipeline.split(new AbstractSplitFunction<String>() {
+            @Override
+            public Iterator<String> split(String input) {
+                return Arrays.asList(input.split(";")).iterator();
+            }
+        }).split(new AbstractSplitFunction<String>() {
+            @Override
+            public Iterator<String> split(String input) {
+                return Arrays.asList(input.split(" ")).iterator();
+            }
+        }).iterator();
+
+        int cnt = 0;
+        while (iterator.hasNext()) {
+            String curr = iterator.next();
+            assertNotNull(curr);
+            assertEquals(exp.get(cnt++), curr);
+        }
+
+    }
+
+    @Test
     public void testAccumumation1() throws Exception {
         List<String> list = new ArrayList<>();
         list.add("3331");

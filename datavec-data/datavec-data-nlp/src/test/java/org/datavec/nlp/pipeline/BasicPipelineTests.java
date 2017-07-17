@@ -7,12 +7,15 @@ import org.datavec.api.pipelines.api.Function;
 import org.datavec.api.pipelines.api.InputFunction;
 import org.datavec.api.pipelines.api.PipelineFunction;
 import org.datavec.api.pipelines.functions.abstracts.AbstractConverterFunction;
+import org.datavec.api.pipelines.functions.abstracts.AbstractFunction;
+import org.datavec.api.pipelines.functions.abstracts.AbstractSplitFunction;
 import org.datavec.api.pipelines.functions.generic.IteratorInputFunction;
 import org.datavec.nlp.pipeline.functions.SentenceBreakerFunction;
 import org.datavec.nlp.sentence.SimpleSentenceBreaker;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -71,5 +74,50 @@ public class BasicPipelineTests {
         }
 
         assertEquals(2, cnt);
+    }
+
+    @Test
+    public void testBasicBuilder3() throws Exception {
+
+        InputFunction<String> inputFunction = new IteratorInputFunction<>();
+        Pipeline<String> pipeline = new Pipeline.Builder<String>(inputFunction)
+                .build();
+
+        String document = "Sentence1 one. Sentence2 two.";
+
+        List<String> exp = new ArrayList<>();
+        exp.add("sentence1");
+        exp.add("one.");
+        exp.add("sentence2");
+        exp.add("two.");
+
+        // feeding single sample here
+        inputFunction.addDataSample(document);
+
+        // we expect input will be defined when execution starts
+        pipeline.split(new SentenceBreakerFunction(new SimpleSentenceBreaker())).split(new AbstractSplitFunction<String>() {
+            @Override
+            public Iterator<String> split(String input) {
+                return Arrays.asList(input.split(" ")).iterator();
+            }
+        }).map(new AbstractFunction<String>() {
+            @Override
+            public String call(String input) {
+                return input.toLowerCase();
+            }
+        });
+
+        Iterator<String> iterator = pipeline.iterator();
+
+        // basically we expect that we'll pass single String as input, and we'll have 2 Strings as output
+        int cnt = 0;
+        while (iterator.hasNext()) {
+            String output = iterator.next();
+
+            assertEquals(exp.get(cnt), output);
+            cnt++;
+        }
+
+        assertEquals(4, cnt);
     }
 }
