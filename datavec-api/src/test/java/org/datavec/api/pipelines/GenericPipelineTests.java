@@ -9,6 +9,7 @@ import org.datavec.api.pipelines.functions.generic.IteratorInputFunction;
 import org.junit.Test;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
 
@@ -473,6 +474,77 @@ public class GenericPipelineTests {
         }, pipeline2, pipeline3);
 
         assertTrue(pipeline1.lastFunction instanceof  AbstractMergeFunction);
+
+        Iterator<Integer> iterator = pipeline1.iterator();
+        int cnt = 0;
+        while (iterator.hasNext()) {
+            log.info("Trying {}", cnt);
+            Integer curr = iterator.next();
+            assertNotNull("Failed at " + cnt, curr);
+            assertEquals("Failed at " + cnt, list.get(cnt).intValue(), curr.intValue());
+            cnt++;
+        }
+    }
+
+    @Test
+    public void testMerge2() throws Exception {
+        List<Integer> list = new ArrayList<>();
+        list.add((((1+1) * 3) * 3));
+        list.add((((2+2) * 3) * 3)+1);
+        list.add((((3+3) * 3) * 3)+2);
+
+
+        InputFunction<Integer> inputFunction1 = new IteratorInputFunction<>();
+        inputFunction1.addDataSample(1);
+        inputFunction1.addDataSample(2);
+        inputFunction1.addDataSample(3);
+
+        InputFunction<Integer> inputFunction2 = new IteratorInputFunction<>();
+        inputFunction2.addDataSample(1);
+        inputFunction2.addDataSample(2);
+        inputFunction2.addDataSample(3);
+
+        InputFunction<Integer> inputFunction3 = new IteratorInputFunction<>();
+        inputFunction3.addDataSample(1);
+        inputFunction3.addDataSample(2);
+        inputFunction3.addDataSample(3);
+
+        Pipeline<Integer> pipeline1 = new Pipeline<>(inputFunction1).map(new AbstractFunction<Integer>() {
+            @Override
+            public Integer call(Integer input) {
+                return input + input;
+            }
+        });
+        Pipeline<Integer> pipeline2 = new Pipeline<>(inputFunction2).map(new AbstractFunction<Integer>() {
+            @Override
+            public Integer call(Integer input) {
+                return input + input;
+            }
+        });
+
+        Pipeline<Integer> pipeline3 = new Pipeline<>(inputFunction3).map(new AbstractFunction<Integer>() {
+            @Override
+            public Integer call(Integer input) {
+                return input+input;
+            }
+        });
+
+
+        pipeline1.merge(new AbstractMergeFunction<Integer>() {
+            @Override
+            public Integer merge(List<Integer> inputs) {
+                return (inputs.get(0) + inputs.get(1) + inputs.get(2)) * 3;
+            }
+
+
+        }, pipeline2, pipeline3).map(new AbstractFunction<Integer>() {
+            AtomicInteger cnt = new AtomicInteger(0);
+
+            @Override
+            public Integer call(Integer input) {
+                return input + cnt.getAndIncrement();
+            }
+        });
 
         Iterator<Integer> iterator = pipeline1.iterator();
         int cnt = 0;
