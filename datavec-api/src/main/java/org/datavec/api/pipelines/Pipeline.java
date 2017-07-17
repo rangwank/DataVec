@@ -41,7 +41,7 @@ public class Pipeline<IN> implements Serializable {
     }
 
     protected Pipeline(@NonNull InputFunction<IN> inputFunction) {
-
+        this.inputFunction = inputFunction;
     }
 
     protected <I> Pipeline(@NonNull Pipeline<I> pipeline) {
@@ -69,6 +69,20 @@ public class Pipeline<IN> implements Serializable {
             lastFunction = function;
         }
 
+        return this;
+    }
+
+    public Pipeline<IN> merge(MergeFunction<IN> function, Pipeline<IN>... pipelines) {
+        function.registerPipeline(this);
+        if (firstFunction == null) {
+            firstFunction = function;
+            lastFunction = function;
+        } else {
+            // if this is not-a-first function - attachNext it to last function
+            lastFunction.attachNext(function);
+            lastFunction = function;
+        }
+        function.attachPipelines(pipelines);
         return this;
     }
 
@@ -209,6 +223,8 @@ public class Pipeline<IN> implements Serializable {
 
             if (pipeline.prePipelines.size() == 0) {
                 // if we're on first or only pipeline, we just go directly here
+                log.info("Pipeline: {}", pipeline);
+                log.info("Input function: {}", pipeline.inputFunction);
                 boolean res = pipeline.hasAccumulated() || pipeline.inputFunction.hasNext();
 
                 log.info("Own result: {}", res);
