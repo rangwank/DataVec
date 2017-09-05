@@ -1,19 +1,3 @@
-/*-
- *  * Copyright 2016 Skymind, Inc.
- *  *
- *  *    Licensed under the Apache License, Version 2.0 (the "License");
- *  *    you may not use this file except in compliance with the License.
- *  *    You may obtain a copy of the License at
- *  *
- *  *        http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  *    Unless required by applicable law or agreed to in writing, software
- *  *    distributed under the License is distributed on an "AS IS" BASIS,
- *  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  *    See the License for the specific language governing permissions and
- *  *    limitations under the License.
- */
-
 package org.datavec.api.split;
 
 import org.datavec.api.util.files.UriFromPathIterator;
@@ -26,6 +10,8 @@ import java.net.URI;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**InputSplit for sequences of numbered files.
  * Example usages:<br>
@@ -39,6 +25,8 @@ public class NumberedFileInputSplit implements InputSplit {
     private final int minIdx;
     private final int maxIdx;
 
+    private static final Pattern p = Pattern.compile("\\%(0\\d)?d");
+
     /**
      * @param baseString String that defines file format. Must contain "%d", which will be replaced with
      *                   the index of the file.
@@ -46,8 +34,9 @@ public class NumberedFileInputSplit implements InputSplit {
      * @param maxIdxInclusive Maximum index/number (last number in sequence of files, inclusive)
      */
     public NumberedFileInputSplit(String baseString, int minIdxInclusive, int maxIdxInclusive) {
-        if (baseString == null || !baseString.contains("%d")) {
-            throw new IllegalArgumentException("Base String must contain  character sequence %d");
+        Matcher m = p.matcher(baseString);
+        if (baseString == null || !m.find()) {
+            throw new IllegalArgumentException("Base String must match this regular expression: " + p.toString());
         }
         this.baseString = baseString;
         this.minIdx = minIdxInclusive;
