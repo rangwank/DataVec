@@ -9,7 +9,7 @@ import static org.junit.Assert.assertEquals;
 public class NumberedFileInputSplitTests {
     @Test
     public void testNumberedFileInputSplitBasic() {
-        String baseString = "/path/to/files/prefix-%d.suffix";
+        String baseString = "/path/to/files/prefix%d.suffix";
         int minIdx = 0;
         int maxIdx = 10;
         runNumberedFileInputSplitTest(baseString, minIdx, maxIdx);
@@ -24,8 +24,24 @@ public class NumberedFileInputSplitTests {
     }
 
     @Test
+    public void testNumberedFileInputSplitBasicNoPrefix() {
+        String baseString = "/path/to/files/%d.suffix";
+        int minIdx = 0;
+        int maxIdx = 10;
+        runNumberedFileInputSplitTest(baseString, minIdx, maxIdx);
+    }
+
+    @Test
     public void testNumberedFileInputSplitWithLeadingZeroes() {
         String baseString = "/path/to/files/prefix-%07d.suffix";
+        int minIdx = 0;
+        int maxIdx = 10;
+        runNumberedFileInputSplitTest(baseString, minIdx, maxIdx);
+    }
+
+    @Test
+    public void testNumberedFileInputSplitWithLeadingZeroesNoSuffix() {
+        String baseString = "/path/to/files/prefix-%d";
         int minIdx = 0;
         int maxIdx = 10;
         runNumberedFileInputSplitTest(baseString, minIdx, maxIdx);
