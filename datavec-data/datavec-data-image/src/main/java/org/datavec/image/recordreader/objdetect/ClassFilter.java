@@ -16,24 +16,8 @@
 
 package org.datavec.image.recordreader.objdetect;
 
-import java.net.URI;
-import java.util.List;
+public interface ClassFilter {
 
-/**
- *
- * @author Alex Black
- */
-public interface ImageObjectLabelProvider {
-
-    /**
-     *
-     * @return List of class labels, or null if the class labels should be collected dynamically (by iterating
-     * over the entire dataset)
-     */
-    List<String> classLabels();
-
-    List<ImageObject> getImageObjectsForPath(String path);
-
-    List<ImageObject> getImageObjectsForPath(URI uri);
+    boolean acceptClass(String className);
 
 }

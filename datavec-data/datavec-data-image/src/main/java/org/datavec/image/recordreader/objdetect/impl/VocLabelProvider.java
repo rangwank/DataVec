@@ -19,6 +19,7 @@ package org.datavec.image.recordreader.objdetect.impl;
 import lombok.NonNull;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.datavec.image.recordreader.objdetect.ClassFilter;
 import org.datavec.image.recordreader.objdetect.ImageObject;
 import org.datavec.image.recordreader.objdetect.ImageObjectLabelProvider;
 
@@ -26,6 +27,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -45,6 +48,11 @@ import java.util.List;
  */
 public class VocLabelProvider implements ImageObjectLabelProvider {
 
+    private static final List<String> OBJECT_CLASSES_ALPHABETICAL = Collections.unmodifiableList(
+            Arrays.asList("aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat",
+                    "chair", "cow", "dining table", "dog", "horse", "motorbike", "person", "potted plant",
+                    "sheep", "sofa", "train", "tv/monitor"));
+
     private static final String OBJECT_START_TAG = "<object>";
     private static final String OBJECT_END_TAG = "</object>";
     private static final String NAME_TAG = "<name>";
@@ -53,15 +61,40 @@ public class VocLabelProvider implements ImageObjectLabelProvider {
     private static final String XMAX_TAG = "<xmax>";
     private static final String YMAX_TAG = "<ymax>";
 
-    private String annotationsDir;
+    private final String annotationsDir;
+    private final ClassFilter classFilter;
+    private final boolean inferLabels;
 
-    public VocLabelProvider(@NonNull String baseDirectory){
+    public VocLabelProvider(@NonNull String baseDirectory) {
+        this(baseDirectory, null, false);
+    }
+
+    public VocLabelProvider(@NonNull String baseDirectory, ClassFilter classFilter, boolean inferLabels){
         this.annotationsDir = FilenameUtils.concat(baseDirectory, "Annotations");
 
         if(!new File(annotationsDir).exists()){
             throw new IllegalStateException("Annotations directory does not exist. Annotation files should be " +
                     "present at baseDirectory/Annotations/nnnnnn.xml. Expected location: " + annotationsDir);
         }
+
+        this.classFilter = classFilter;
+        this.inferLabels = inferLabels;
+    }
+
+    @Override
+    public List<String> classLabels() {
+        if(inferLabels){
+            return null;
+        } else if(classFilter != null){
+            List<String> filtered = new ArrayList<>();
+            for(String s : OBJECT_CLASSES_ALPHABETICAL){
+                if(classFilter.acceptClass(s)){
+                    filtered.add(s);
+                }
+            }
+            return filtered;
+        }
+        return OBJECT_CLASSES_ALPHABETICAL;
     }
 
     @Override
