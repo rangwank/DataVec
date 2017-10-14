@@ -1,6 +1,7 @@
 package org.datavec.api.io.filters;
 
 import java.net.URI;
+import java.util.*;
 /**
  * This is an EXPERIMENTAL work, no stability is guaranteed in any shape or form.
  * This path filter is supposed to extend the functionality of the existing BalancedPathFilter by allowing certain labels to have more data than others. 
