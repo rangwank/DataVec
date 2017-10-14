@@ -25,29 +25,29 @@ public class ProportionalPathFilter extends RandomPathFilter{
 	protected int[] minPathsPerLabel, maxPathsPerLabel, ratio;
 	protected String[] labels = null;
 
-	/** Calls {@code this(random, extensions, labelGenerator, 0, 0, 0, 0)}. */
+	/** Calls {@code this(random, extensions, labelGenerator, 0, 0, null, null, ratio)}. */
 	public ProportionalPathFilter(Random random, String[] extensions, PathLabelGenerator labelGenerator, int[] ratio) {
         this(random, extensions, labelGenerator, 0, 0, null, null, ratio);
     }
 
-    /** Calls {@code this(random, null, labelGenerator, 0, 0, 0, maxPathsPerLabel)}. */
+    /** Calls {@code this(random, null, labelGenerator, 0, 0, ratio, null, maxPathsPerLabel)}. */
     public ProportionalPathFilter(Random random, PathLabelGenerator labelGenerator, int[] ratio, int[] maxPathsPerLabel) {
         this(random, null, labelGenerator, 0, 0, ratio, null, maxPathsPerLabel);
     }
 
-    /** Calls {@code this(random, extensions, labelGenerator, 0, 0, 0, maxPathsPerLabel)}. */
+    /** Calls {@code this(random, extensions, labelGenerator, 0, 0, ratio, null, maxPathsPerLabel)}. */
     public ProportionalPathFilter(Random random, String[] extensions, PathLabelGenerator labelGenerator, int[] ratio,
                     int[] maxPathsPerLabel) {
         this(random, extensions, labelGenerator, 0, 0, ratio, null, maxPathsPerLabel);
     }
 
-    /** Calls {@code this(random, extensions, labelGenerator, 0, maxLabels, 0, maxPathsPerLabel)}. */
+    /** Calls {@code  this(random, null, labelGenerator, maxPaths, maxLabels, ratio, null, maxPathsPerLabel)}. */
     public ProportionalPathFilter(Random random, PathLabelGenerator labelGenerator, int maxPaths, int maxLabels, int[] ratio,
                     int[] maxPathsPerLabel) {
         this(random, null, labelGenerator, maxPaths, maxLabels, ratio, null, maxPathsPerLabel);
     }
 
-    /** Calls {@code this(random, extensions, labelGenerator, 0, maxLabels, 0, maxPathsPerLabel)}. */
+    /** Calls {@code this(random, extensions, labelGenerator, 0, maxLabels, ratio, null, maxPathsPerLabel)}. */
     public ProportionalPathFilter(Random random, String[] extensions, PathLabelGenerator labelGenerator, int maxLabels, int[] ratio,
                     int[] maxPathsPerLabel) {
         this(random, extensions, labelGenerator, 0, maxLabels, ratio, null, maxPathsPerLabel);
