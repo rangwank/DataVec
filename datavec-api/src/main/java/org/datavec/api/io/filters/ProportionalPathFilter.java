@@ -1,5 +1,9 @@
 package org.datavec.api.io.filters;
 
+import org.datavec.api.io.labels.ParentPathLabelGenerator;
+import org.datavec.api.io.labels.PathLabelGenerator;
+import org.datavec.api.writable.Writable;
+
 import java.net.URI;
 import java.util.*;
 /**
